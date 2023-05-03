@@ -218,6 +218,11 @@
 		"name": "_nftData",
 		"outputs": [
 			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
 				"internalType": "string",
 				"name": "name",
 				"type": "string"
@@ -231,6 +236,16 @@
 				"internalType": "string",
 				"name": "image",
 				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "minter",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "minted",
+				"type": "uint256"
 			}
 		],
 		"stateMutability": "view",
@@ -413,6 +428,11 @@
 			{
 				"components": [
 					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
 						"internalType": "string",
 						"name": "name",
 						"type": "string"
@@ -426,6 +446,67 @@
 						"internalType": "string",
 						"name": "image",
 						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "minter",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minted",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct OnchainNames.NFTData[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "tokenid",
+				"type": "uint256"
+			}
+		],
+		"name": "seeYourNft",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "name",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "image",
+						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "minter",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "minted",
+						"type": "uint256"
 					}
 				],
 				"internalType": "struct OnchainNames.NFTData[]",

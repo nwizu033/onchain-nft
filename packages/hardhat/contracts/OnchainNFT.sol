@@ -1,81 +1,134 @@
 // SPDX-License-Identifier: MIT
+
 pragma solidity ^0.8.17;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 
-// import "base64-sol/base64.sol";
+contract OnchainNames is ERC721URIStorage {
+    using Strings for uint256;
+    using Counters for Counters.Counter;
+    Counters.Counter private _tokenIds;
+    uint256 public tokenIds;
 
-contract OnchainNFT is ERC721URIStorage {
-    uint256 private s_tokenCounter;
+    mapping(uint256 => NFTData) public _nftData;
+    mapping(address => mapping(uint256 => NFTData)) _addressTonftData;
+
+    mapping(uint256 => string) public names;
 
     struct NFTData {
+        uint id;
         string name;
         string description;
         string image;
+        address minter;
+        uint256 minted;
     }
 
-    mapping(uint256 => NFTData) public _nftData;
+    constructor() ERC721("Onchain Names", "ONCN") {}
 
-    string svgg =
-        '<svg width="400" height="110"><rect width="300" height="100" style="fill:rgb(0,0,255);stroke-width:3;stroke:rgb(0,0,0)"/></svg>';
+    function generateCharacter(
+        uint256 tokenId
+    ) public view returns (string memory) {
+        bytes memory svg = abi.encodePacked(
+            '<svg xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMinYMin meet" viewBox="0 0 350 350">',
+            "<style>.base { fill: white; font-family: serif; font-size: 14px; }</style>",
+            '<rect width="100%" height="100%" fill="black" />',
+            '<text x="50%" y="40%" class="base" dominant-baseline="middle" text-anchor="middle">',
+            "Minter Details",
+            "</text>",
+            '<text x="50%" y="50%" class="base" dominant-baseline="middle" text-anchor="middle">',
+            "Name: ",
+            getNames(tokenId),
+            "</text>",
+            "</svg>"
+        );
+        return
+            string(
+                abi.encodePacked(
+                    "data:image/svg+xml;base64,",
+                    Base64.encode(svg)
+                )
+            );
+    }
 
-    constructor() ERC721("Onchain NFT", "ONFT") {}
+    function getNames(uint256 tokenId) public view returns (string memory) {
+        string memory name = names[tokenId];
+        return name;
+    }
 
-    // mint function
+    function getTokenURI(uint256 tokenId) public view returns (string memory) {
+        NFTData memory nftData = _nftData[tokenId];
+
+        bytes memory dataURI = abi.encodePacked(
+            "{",
+            '"name": "Minter #',
+            tokenId.toString(),
+            '",',
+            '"description": "',
+            nftData.description,
+            '"',
+            '"image": "',
+            generateCharacter(tokenId),
+            '"',
+            "}"
+        );
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    Base64.encode(dataURI)
+                )
+            );
+    }
+
     function mintNft(string memory name, string memory description) public {
-        // set svg to image uri
-        string memory Image = svgToImageURI(svgg);
-        // mint
-        uint256 tokenId = s_tokenCounter + 1;
-        _mint(msg.sender, tokenId);
-        _nftData[tokenId] = NFTData(name, description, Image);
+        tokenIds++;
+        _tokenIds.increment();
+        uint256 tokenId = _tokenIds.current();
+        names[tokenId] = name;
+        string memory Image = generateCharacter(tokenId);
+        _safeMint(msg.sender, tokenId);
+        _nftData[tokenId] = NFTData(
+            tokenId,
+            name,
+            description,
+            Image,
+            msg.sender,
+            block.timestamp
+        );
+        _addressTonftData[msg.sender][tokenId] = NFTData(
+            tokenId,
+            name,
+            description,
+            Image,
+            msg.sender,
+            block.timestamp
+        );
 
         // generate the token uri
-        string memory tokenURI = generateTokenURI(tokenId);
+        string memory tokenURI = getTokenURI(tokenId);
         _setTokenURI(tokenId, tokenURI);
     }
 
-    function svgToImageURI(
-        string memory svg
-    ) public pure returns (string memory) {
-        string memory baseURL = "data:image/svg+xml;base64,";
-        string memory svgBase64Encoded = Base64.encode(
-            bytes(string(abi.encodePacked(svg)))
-        );
-        return string(abi.encodePacked(baseURL, svgBase64Encoded));
+    function seeYourNft(
+        uint256 tokenid
+    ) public view returns (NFTData[] memory) {
+        NFTData memory nft = _addressTonftData[msg.sender][tokenid];
+        NFTData[] memory arr = new NFTData[](1);
+        arr[0] = nft;
+
+        return arr;
     }
 
-    function generateTokenURI(
-        uint256 tokenId
-    ) private view returns (string memory) {
-        // Get the NFT data for the given tokenId
-        NFTData memory nftData = _nftData[tokenId];
+    function seeNFTs() public view returns (NFTData[] memory) {
+        NFTData[] memory arr = new NFTData[](tokenIds);
 
-        // Create the metadata JSON object
-        string memory json = string(
-            abi.encodePacked(
-                "{",
-                '"name": "',
-                nftData.name,
-                '",',
-                '"description": "',
-                nftData.description,
-                '",',
-                '"image": "',
-                nftData.image,
-                '",',
-                "}"
-            )
-        );
-        // generate the tokenUri by base64-encoding the metadata json
-        string memory tokenURI = string(
-            abi.encodePacked(
-                "data:application/json;base64,",
-                Base64.encode(bytes(json))
-            )
-        );
-
-        return tokenURI;
+        for (uint256 i = 0; i < tokenIds; i++) {
+            arr[i] = _nftData[i + 1];
+        }
+        return arr;
     }
 }

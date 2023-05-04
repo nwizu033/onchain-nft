@@ -9,7 +9,7 @@ export default function Home() {
   const { data: signer, isError, isLoading } = useSigner();
   const [name, setName] = useState('');
   const [desc, setDesc] = useState('');
-  const [yourNft, setYourNft] = useState();
+  const [yourNft, setYourNft] = useState([]);
   const [tokenId, setTokenId] = useState('');
    
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) =>{

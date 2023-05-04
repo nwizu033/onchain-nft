@@ -4,13 +4,15 @@ import { ethers } from 'ethers';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 export default function Home() {
+
+    interface MyNFT{
+        id: number;
+        image: string;
+    }
     const contractAddress = "0x3c5aD009d2e9f11A06c6ec31377D612C81f6b224"
     const { data: signer, isError, isLoading } = useSigner();
-    const [nftList, setNftList] = useState([]);
+    const [nftList, setNftList] = useState<MyNFT[]>([]);
     
-  
-    
-
 
     useEffect(() => {
 

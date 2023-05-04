@@ -5,11 +5,16 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 export default function Home() {
+  interface MyNFT{
+    id: number;
+    image: string;
+    name: string;
+}
   const contractAddress = "0x3c5aD009d2e9f11A06c6ec31377D612C81f6b224"
   const { data: signer, isError, isLoading } = useSigner();
   const [name, setName] = useState('');
   const [desc, setDesc] = useState('');
-  const [yourNft, setYourNft] = useState([]);
+  const [yourNft, setYourNft] = useState<MyNFT[]> ([]);
   const [tokenId, setTokenId] = useState('');
    
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) =>{
